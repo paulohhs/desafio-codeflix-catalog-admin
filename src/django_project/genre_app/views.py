@@ -80,18 +80,21 @@ class GenreViewSet(viewsets.ViewSet):
 
         return Response(status=HTTP_204_NO_CONTENT)
 
-    def update(self, request: Request, pk: UUID = None):
-        serializer = UpdateGenreInputSerializer(data={
-            **request.data,
-            "id": pk,
-        })
+    def update(self, request: Request, pk: UUID = None) -> Response:
+        serializer = UpdateGenreInputSerializer(
+            data={
+                **request.data,
+                "id": pk,
+            }
+        )
         serializer.is_valid(raise_exception=True)
-        input = UpdateGenre.Input(**serializer.validated_data)
 
+        input = UpdateGenre.Input(**serializer.validated_data)
         use_case = UpdateGenre(
             repository=DjangoORMGenreRepository(),
             category_repository=DjangoORMCategoryRepository(),
         )
+        
         try:
             use_case.execute(input)
         except GenreNotFound:
