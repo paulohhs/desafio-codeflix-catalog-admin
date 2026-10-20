@@ -43,6 +43,7 @@ class Genre(Entity):
     def update_categories(self, categories: set[UUID]) -> None:
         self.categories.clear()
         self.categories.update(categories)
+        self.validate()
 
     def change_name(self, name):
         self.name = name
