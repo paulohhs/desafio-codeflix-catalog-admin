@@ -1,5 +1,5 @@
 from uuid import UUID
-from django.shortcuts import render
+
 from rest_framework import viewsets
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -9,7 +9,7 @@ from rest_framework.status import (
     HTTP_404_NOT_FOUND,
     HTTP_201_CREATED,
 )
-from rest_framework.fields import UUIDField
+
 from src.core.category.application.use_cases.create_category import (
     CreateCategory,
     CreateCategoryRequest,
@@ -17,17 +17,15 @@ from src.core.category.application.use_cases.create_category import (
 from src.core.category.application.use_cases.delete_category import DeleteCategory, DeleteCategoryRequest
 from src.core.category.application.use_cases.exceptions import (
     CategoryNotFound,
-    InvalidCategory,
-)
-
-from src.core.category.application.use_cases.list_category import (
-    ListCategory,
-    ListCategoryRequest,
-    ListCategoryResponse,
 )
 from src.core.category.application.use_cases.get_category import (
     GetCategory,
     GetCategoryRequest,
+)
+from src.core.category.application.use_cases.list_category import (
+    ListCategory,
+    ListCategoryRequest,
+    ListCategoryResponse,
 )
 from src.core.category.application.use_cases.update_category import UpdateCategory, UpdateCategoryRequest
 from src.django_project.category_app.repository import DjangoORMCategoryRepository
@@ -40,12 +38,19 @@ from src.django_project.category_app.serializers import (
     RetrieveCategoryResponseSerializer,
     UpdateCategoryRequestSerializer,
 )
+from src.django_project.permissions import IsAuthenticated, IsAdmin
 
 
 class CategoryViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated & IsAdmin]
+
     def list(self, request: Request) -> Response:
+        order_by = request.query_params.get("order_by", "name")
         use_case = ListCategory(repository=DjangoORMCategoryRepository())
-        output: ListCategoryResponse = use_case.execute(request=ListCategoryRequest())
+        output: ListCategoryResponse = use_case.execute(request=ListCategoryRequest(
+            order_by=order_by,
+            current_page=int(request.query_params.get("current_page", 1)),
+        ))
         response_serializer = ListCategoryResponseSerializer(output)
 
         return Response(

@@ -96,9 +96,12 @@ class GenreViewSet(viewsets.ViewSet):
         )
         
         try:
-            use_case.execute(input=input)
+            use_case.execute(input)
         except GenreNotFound:
-            return Response(status=HTTP_404_NOT_FOUND)
+            return Response(
+                status=HTTP_404_NOT_FOUND,
+                data={"error": f"Genre with id {pk} not found"},
+            )
         except (InvalidGenre, RelatedCategoriesNotFound) as error:
             return Response(
                 status=HTTP_400_BAD_REQUEST,

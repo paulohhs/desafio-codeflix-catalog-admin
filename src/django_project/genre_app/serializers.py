@@ -42,4 +42,3 @@ class UpdateGenreInputSerializer(serializers.Serializer):
     name = serializers.CharField(required=True)
     is_active = serializers.BooleanField(required=True)
     categories = SetField(child=serializers.UUIDField(), required=True, allow_empty=True)
-
